@@ -4,15 +4,26 @@ import android.os.Parcel
 import android.os.Parcelable
 
 class Weather() : Parcelable {
+    var city: City? = null
     var temperature: Int? = null
     var feelsLike: Int? = null
 
     constructor(parcel: Parcel) : this() {
+        city = parcel.readParcelable(City::class.java.classLoader)
         temperature = parcel.readValue(Int::class.java.classLoader) as? Int
         feelsLike = parcel.readValue(Int::class.java.classLoader) as? Int
     }
 
+    constructor(city: City,
+                temperature: Int,
+                feelsLike: Int) : this() {
+        this.city = city
+        this.feelsLike = feelsLike
+        this.temperature = temperature
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeParcelable(city, flags)
         parcel.writeValue(temperature)
         parcel.writeValue(feelsLike)
     }
@@ -30,6 +41,9 @@ class Weather() : Parcelable {
             return arrayOfNulls(size)
         }
     }
+
 }
 
-fun getDefaultCity() = City("Moscow")
+fun getCites() = listOf<Weather>(
+    Weather(City("Moscow"), 12, 13)
+)
