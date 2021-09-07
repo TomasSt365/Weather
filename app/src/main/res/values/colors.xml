@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="loadingBackground">#1B004A</color>
+    <color name="queryTextColor">#FB01F101</color>
 </resources>
