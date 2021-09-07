@@ -3,13 +3,29 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/query_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainView"
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="250dp"
+        android:background="#5D000000">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.06" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.78"/>
 
         <TextView
             android:id="@+id/cityName"
@@ -18,11 +34,11 @@
             android:layout_marginTop="@dimen/city_name_margin_top"
             android:textSize="35sp"
             android:textStyle="bold"
+            android:textColor="@android:color/holo_red_dark"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Москва" />
-
 
         <TextView
             android:id="@+id/temperatureLabel"
@@ -30,7 +46,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_15_dp"
             android:text="@string/temperature_label"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textColor="@color/queryTextColor"
+            android:textSize="@dimen/subtitleSize"
+            app:layout_constraintStart_toStartOf="@+id/guideline2"
             app:layout_constraintTop_toBottomOf="@+id/cityName" />
 
         <TextView
@@ -39,9 +57,10 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/temperature_value_text_size"
             android:textStyle="bold"
+            android:textColor="@color/purple_700"
             app:layout_constraintBottom_toBottomOf="@+id/temperatureLabel"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/temperatureLabel"
             app:layout_constraintTop_toTopOf="@+id/temperatureLabel"
             tools:text="+15" />
 
@@ -51,7 +70,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_15_dp"
             android:text="@string/feels_like_label"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textColor="@color/queryTextColor"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@+id/guideline2"
             app:layout_constraintTop_toBottomOf="@+id/temperatureValue" />
 
         <TextView
@@ -60,9 +81,10 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/feels_like_text_size"
             android:textStyle="bold"
+            android:textColor="@color/purple_700"
             app:layout_constraintBottom_toBottomOf="@+id/feelsLikeLabel"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/feelsLikeLabel"
             app:layout_constraintTop_toTopOf="@+id/feelsLikeLabel"
             tools:text="-23" />
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -73,7 +95,7 @@
         android:layout_height="match_parent"
         android:background="@color/loadingBackground"
         android:visibility="gone"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"
