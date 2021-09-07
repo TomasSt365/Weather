@@ -41,7 +41,6 @@ class QueryScreenFragment : Fragment() {
                 Observer<AppState> { appState: AppState -> renderData(appState) })
         mainViewModel.getWeatherFromLocalSource()
         setData(getCites()[0])//todo: костыль
-        //fixme: данные не выводяться
     }
 
     private fun renderData(appState: AppState) {
@@ -53,7 +52,6 @@ class QueryScreenFragment : Fragment() {
             }
             AppState.Loading -> {
                 binding.loadingLayout.visibility = View.VISIBLE
-            //fixme: loadingLayout не выводиться
             }
             is AppState.Success -> {
                 binding.loadingLayout.visibility = View.GONE

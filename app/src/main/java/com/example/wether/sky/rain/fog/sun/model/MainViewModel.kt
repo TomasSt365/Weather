@@ -17,7 +17,6 @@ class MainViewModel(
 
     private fun getDataFromLocalSource() {
         liveDataToObserve.postValue(AppState.Loading)
-        //fixme: loadingLayout не выводиться
         Thread {
             sleep(1500)
             liveDataToObserve.postValue(AppState.Success(controller.getWeatherFromLocalStorage()))
