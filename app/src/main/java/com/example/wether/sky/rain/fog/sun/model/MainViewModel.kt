@@ -18,7 +18,7 @@ class MainViewModel(
     private fun getDataFromLocalSource() {
         liveDataToObserve.postValue(AppState.Loading)
         Thread {
-            sleep(1500)
+            sleep(1000)
             liveDataToObserve.postValue(AppState.Success(controller.getWeatherFromLocalStorage()))
         }.start()
     }
