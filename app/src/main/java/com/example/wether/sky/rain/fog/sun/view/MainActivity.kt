@@ -3,7 +3,7 @@ package com.example.wether.sky.rain.fog.sun.view
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.wether.sky.rain.fog.sun.R
-import com.example.wether.sky.rain.fog.sun.view.main.QueryScreenFragment
+import com.example.wether.sky.rain.fog.sun.view.main.CityListFragment
 
 class MainActivity : AppCompatActivity() {
     private val navigation = Navigation(supportFragmentManager)
@@ -12,11 +12,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        navigation.addFragment(
+        navigation.replaceFragment(
             containerId = R.id.main_fragment_container,
-            fragment = QueryScreenFragment.newInstance(),
+            fragment = CityListFragment.newInstance(),
             addToBackStack = false
         )
-        //todo: запускать в дальнейшем главную страницу
     }
 }
