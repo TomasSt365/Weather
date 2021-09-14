@@ -7,11 +7,26 @@ import kotlinx.parcelize.Parcelize
 data class Weather(
     var city: City,
     var temperature: Int,
-    var feelsLike: Int
+    var feelsLike: Int,
 ) : Parcelable
 
-fun getCites() =
-    getRussianCities()//todo: сделать выбор нужного метода по выбраным натройкам(RU, World, EU и т.д.)
+fun getCites(cityTag: CityTags): List<Weather> {
+
+    /**Нереализованные локали не должны быть в списке !!!*/
+
+    return when (cityTag) {
+        CityTags.RU -> {
+            getRussianCities()
+        }
+        /*CityTags.EU->{
+
+        }*/
+        CityTags.World -> {
+            getWorldCities()
+        }
+        else -> getWorldCities()
+    }
+}
 
 fun getWorldCities(): List<Weather> {
     return listOf(

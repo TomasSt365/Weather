@@ -13,7 +13,6 @@ import com.example.wether.sky.rain.fog.sun.data.Weather
 class CityListAdapter : RecyclerView.Adapter<CityListAdapter.MainFragmentViewHolder>() {
 
     private var weatherData: List<Weather> = listOf()
-    private var isDataSetRus: Boolean = true
     private lateinit var listener: OnItemViewClickListener
 
     /*private var _biding: ItemListElementBinding? = null

@@ -7,7 +7,7 @@ class Navigation(
     private val fragmentManager: FragmentManager
 ) {
 
-    fun addFragment(
+    fun replaceFragment(
         containerId: Int,
         fragment: Fragment?,
         addToBackStack: Boolean
@@ -18,6 +18,73 @@ class Navigation(
         }
         fragmentTransaction
             .replace(containerId, fragment!!)
+            .commit()
+    }
+
+    fun replaceFragment(
+        containerId: Int,
+        fragment: Fragment?,
+        addToBackStack: Boolean,
+        backStackTag: String?
+    ) {
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        if (addToBackStack) {
+            fragmentTransaction.addToBackStack(backStackTag)
+        }
+        fragmentTransaction
+            .replace(containerId, fragment!!)
+            .commit()
+    }
+
+    fun replaceFragment(
+        containerId: Int,
+        fragment: Fragment?,
+        addToBackStack: Boolean,
+        popBackStackBeforeAdd: Boolean
+    ) {
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        if (popBackStackBeforeAdd) {
+            fragmentManager.popBackStack()
+        }
+        if (addToBackStack) {
+            fragmentTransaction.addToBackStack("")
+        }
+        fragmentTransaction
+            .replace(containerId, fragment!!)
+            .commit()
+    }
+
+    fun replaceFragment(
+        containerId: Int,
+        fragment: Fragment?,
+        addToBackStack: Boolean,
+        popBackStackBeforeAdd: Boolean,
+        backStackTag: String?
+    ) {
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        if (popBackStackBeforeAdd) {
+            fragmentManager.popBackStack()
+        }
+        if (addToBackStack) {
+            fragmentTransaction.addToBackStack(backStackTag)
+        }
+        fragmentTransaction
+            .replace(containerId, fragment!!)
+            .commit()
+    }
+
+
+    fun addFragment(
+        containerId: Int,
+        fragment: Fragment?,
+        addToBackStack: Boolean
+    ) {
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        if (addToBackStack) {
+            fragmentTransaction.addToBackStack("")
+        }
+        fragmentTransaction
+            .add(containerId, fragment!!)
             .commit()
     }
 
@@ -32,7 +99,7 @@ class Navigation(
             fragmentTransaction.addToBackStack(backStackTag)
         }
         fragmentTransaction
-            .replace(containerId, fragment!!)
+            .add(containerId, fragment!!)
             .commit()
     }
 
@@ -50,7 +117,7 @@ class Navigation(
             fragmentTransaction.addToBackStack("")
         }
         fragmentTransaction
-            .replace(containerId, fragment!!)
+            .add(containerId, fragment!!)
             .commit()
     }
 
@@ -69,7 +136,7 @@ class Navigation(
             fragmentTransaction.addToBackStack(backStackTag)
         }
         fragmentTransaction
-            .replace(containerId, fragment!!)
+            .add(containerId, fragment!!)
             .commit()
     }
 }

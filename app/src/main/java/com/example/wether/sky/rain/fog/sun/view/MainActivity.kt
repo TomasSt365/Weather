@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        navigation.addFragment(
+        navigation.replaceFragment(
             containerId = R.id.main_fragment_container,
             fragment = CityListFragment.newInstance(),
             addToBackStack = false
