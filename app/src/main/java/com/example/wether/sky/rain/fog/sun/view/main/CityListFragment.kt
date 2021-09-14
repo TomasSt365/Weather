@@ -1,12 +1,19 @@
 package com.example.wether.sky.rain.fog.sun.view.main
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.wether.sky.rain.fog.sun.R
+import com.example.wether.sky.rain.fog.sun.R.string.ErrorText
+import com.example.wether.sky.rain.fog.sun.R.string.SuccessMessage
 import com.example.wether.sky.rain.fog.sun.data.CityTags
 import com.example.wether.sky.rain.fog.sun.data.Weather
 import com.example.wether.sky.rain.fog.sun.databinding.FragmentCityListBinding
@@ -16,10 +23,11 @@ import com.example.wether.sky.rain.fog.sun.view.Navigation
 import com.example.wether.sky.rain.fog.sun.view.main.adapter.CityListAdapter
 import com.example.wether.sky.rain.fog.sun.view.main.adapter.OnItemViewClickListener
 import com.google.android.material.snackbar.Snackbar
-import com.example.wether.sky.rain.fog.sun.R
-import com.example.wether.sky.rain.fog.sun.R.string.*
 
 class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListener {
+
+    private val icons: HashMap<CityTags, Int> = HashMap()//todo: переделать через EnumMap c исп. lazy
+
     private lateinit var viewModel: MainViewModel
     private var navigation: Navigation? = null
 
@@ -27,12 +35,15 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
     private val binding: FragmentCityListBinding
         get() = _binding!!
 
-    /**Иконка должна соответствовать тегу!*/
-    private val defaultCityTag = CityTags.World
-    private val defaultCityIc = R.drawable.ic_world
+    private lateinit var sp: SharedPreferences
 
     private var adapter = CityListAdapter()
-    private var cityTag: CityTags? = null
+    private var cityTag: CityTags = CityTags.World
+
+    private fun initIcons() {
+        icons[CityTags.World] = R.drawable.ic_world
+        icons[CityTags.RU] = R.drawable.ic_ru
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,23 +51,25 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentCityListBinding.inflate(inflater, container, false)
-        initViewAndVars()
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initIcons()
+        initViewAndVars()
+        readSPSettings()
+        icons[cityTag]?.let { binding.mainFragmentFAB.setImageResource(it) }
+        initAdapter()
+        getResourcesFromLocalServer(cityTag)
     }
 
     private fun initViewAndVars() {
         navigation = Navigation(requireActivity().supportFragmentManager)
         binding.mainFragmentFAB.setOnClickListener(this)
-
-        cityTag = defaultCityTag
-        binding.mainFragmentFAB.setImageResource(defaultCityIc)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initAdapter()
-        cityTag?.let { getResourcesFromLocalServer(it) }
+        sp = requireActivity()
+            .getSharedPreferences(SP_KEY, Context.MODE_PRIVATE)
     }
 
     private fun initAdapter() {
@@ -72,7 +85,7 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
             .observe(
                 viewLifecycleOwner,
                 Observer<AppState> { appState: AppState -> renderData(appState) })
-        cityTag.let { viewModel.getWeatherFromLocalSource(it) }
+        viewModel.getWeatherFromLocalSource(cityTag)
     }
 
     private fun renderData(appState: AppState) {
@@ -101,44 +114,28 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
             when (view) {
                 binding.mainFragmentFAB -> {
 
-                    /**Правило для cityTag и FAB иконки:
+                    /**Правило для cityTag:
                      * 1)Сравнимое значение не должно совпадать с устанавливаемым:
-                     * сравн. знач. -> {
-                     *          binding.mainFragmentFAB.setImageResource(!= иконка сравн. знач.)
-                     *          cityTag != сравн. знач.
-                     * }
+                     * сравн. знач. -> cityTag != сравн. знач.
                      *
                      * 2)Устанавлемое значение должно совпадать с сравнимуемым следующим, если оно есть:
-                     * сравн. знач. -> {
-                     *          binding.mainFragmentFAB.setImageResource(иконка след.сравн.)
-                     *          cityTag = след.сравн.
-                     * } cityTag = след.сравн.
+                     * сравн. знач. -> cityTag = след.сравн.
                      *
                      * 3)Если сравнение последнее, то утанавлемое значение должно совпадать с 1-м сравнимуемым:
-                     * сравн. знач. -> {
-                     *          binding.mainFragmentFAB.setImageResource(иконка 1-го сравн.)
-                     *          cityTag = 1-е сравн.
-                     * }
+                     * сравн. знач. -> cityTag = 1-е сравн.
                      * */
 
                     /**Нереализованные локали не должны быть в списке !!!*/
 
                     cityTag = when (cityTag) {
-                        CityTags.RU -> {
-                            binding.mainFragmentFAB.setImageResource(R.drawable.ic_world)
-                            CityTags.World
-                        }
-                        /*CityTags.EU -> {
-                            //binding.mainFragmentFAB.setImageResource(R.drawable.)
-                            CityTags.World
-                        }*/
-                        CityTags.World -> {
-                            binding.mainFragmentFAB.setImageResource(R.drawable.ic_ru)
-                           CityTags.RU
-                        }
+                        CityTags.RU -> CityTags.World
+                        /*CityTags.EU -> CityTags.World*/
+                        CityTags.World -> CityTags.RU
                         else -> CityTags.World
                     }
-                    viewModel.getWeatherFromLocalSource(cityTag!!)
+                    icons[cityTag]?.let { binding.mainFragmentFAB.setImageResource(it) }
+                    viewModel.getWeatherFromLocalSource(cityTag)
+                    writeSP()
                 }
             }
         }
@@ -163,7 +160,29 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
         navigation = null
     }
 
+
+    @SuppressLint("CommitPrefEdits")
+    private fun writeSP() {
+        val editor = sp.edit()
+        editor.putString(CITY_TAG_KEY, cityTag.tag)
+        Log.d("mylogs", "write: ${cityTag.tag}")
+        editor.apply()
+    }
+
+    private fun readSPSettings() {
+        sp.getString(CITY_TAG_KEY, CityTags.World.tag).also {
+            if (it != null) {
+                cityTag = CityTags.getEnumByTag(it)
+                Log.d("mylogs", "it: $it")
+                Log.d("mylogs", "read: $cityTag")
+            }
+        }
+    }
+
     companion object {
+        const val SP_KEY = "SP_KEY"
+        const val CITY_TAG_KEY = "CITY_TAG_KEY"
+
         fun newInstance(): CityListFragment {
             val args = Bundle()
             val fragment = CityListFragment()

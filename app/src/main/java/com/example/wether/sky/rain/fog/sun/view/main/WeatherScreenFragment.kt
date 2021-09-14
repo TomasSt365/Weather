@@ -1,5 +1,8 @@
 package com.example.wether.sky.rain.fog.sun.view.main
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
