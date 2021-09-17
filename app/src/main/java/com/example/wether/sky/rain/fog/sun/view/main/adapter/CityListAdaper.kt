@@ -37,7 +37,11 @@ class CityListAdapter : RecyclerView.Adapter<CityListAdapter.MainFragmentViewHol
     }
 
     override fun onBindViewHolder(holder: MainFragmentViewHolder, position: Int) {
-        holder.cityName.text = weatherData[position].city?.name ?: ""
+        with(holder){
+            cityName.apply {
+                text = weatherData[position].city?.name ?: ""
+            }
+        }
     }
 
     override fun getItemCount() = weatherData.size

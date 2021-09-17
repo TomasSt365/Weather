@@ -6,8 +6,9 @@ import com.example.wether.sky.rain.fog.sun.data.CityTags
 
 class ControllerImpl : Controller {
 
-    override fun getWeatherFromLocalStorage(cityTag: CityTags): List<Weather> {
-        return getCites(cityTag)
-    }
+    override fun getWeatherFromLocalStorage(cityTag: CityTags) = getCites(cityTag)
+
+    override fun errorGettingWeather() =
+        Throwable("failed to get a response from the server")//не смог достучаться до ресурсов
 
 }

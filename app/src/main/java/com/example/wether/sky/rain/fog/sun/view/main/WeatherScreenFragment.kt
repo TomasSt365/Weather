@@ -46,9 +46,17 @@ class WeatherScreenFragment : Fragment() {
     }
 
     private fun setData(weather: Weather) {
-        binding.cityName.text = weather.city.name
-        binding.temperatureValue.text = weather.temperature.toString()
-        binding.feelsLikeValue.text = weather.feelsLike.toString()
+        with(binding) {
+            cityName.apply {
+                text = weather.city.name
+            }
+            temperatureValue.apply {
+                text = weather.temperature.toString()
+            }
+            feelsLikeValue.apply {
+                text = weather.feelsLike.toString()
+            }
+        }
     }
 
     override fun onDetach() {
@@ -65,8 +73,11 @@ class WeatherScreenFragment : Fragment() {
         const val WEATHER_KEY = "WEATHER_KEY"
         fun newInstance(bundle: Bundle): WeatherScreenFragment {
             val fragment = WeatherScreenFragment()
-            fragment.arguments = bundle
-            return fragment
+
+            with(fragment) {
+                arguments = bundle
+                return this
+            }
         }
     }
 }
