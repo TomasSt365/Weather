@@ -12,8 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.wether.sky.rain.fog.sun.R
-import com.example.wether.sky.rain.fog.sun.R.string.ErrorText
-import com.example.wether.sky.rain.fog.sun.R.string.SuccessMessage
+import com.example.wether.sky.rain.fog.sun.R.string.*
 import com.example.wether.sky.rain.fog.sun.data.CityTags
 import com.example.wether.sky.rain.fog.sun.data.Weather
 import com.example.wether.sky.rain.fog.sun.databinding.FragmentCityListBinding
@@ -23,10 +22,12 @@ import com.example.wether.sky.rain.fog.sun.view.Navigation
 import com.example.wether.sky.rain.fog.sun.view.main.adapter.CityListAdapter
 import com.example.wether.sky.rain.fog.sun.view.main.adapter.OnItemViewClickListener
 import com.google.android.material.snackbar.Snackbar
+import java.util.*
+import kotlin.collections.HashMap
 
 class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListener {
 
-    private val icons: HashMap<CityTags, Int> = HashMap()//todo: переделать через EnumMap c исп. lazy
+    private val icons: HashMap<CityTags, Int> = HashMap()
 
     private lateinit var viewModel: MainViewModel
     private var navigation: Navigation? = null
@@ -39,12 +40,11 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
 
     private var adapter = CityListAdapter()
     private var cityTag: CityTags = CityTags.World
+    private var startResponseTime: Double = 0.0
 
     private fun initIcons() {
-        with(icons){
-            this[CityTags.World] = R.drawable.ic_world
-            this[CityTags.RU] =R.drawable.ic_ru
-        }
+        icons[CityTags.World] = R.drawable.ic_world
+        icons[CityTags.RU] = R.drawable.ic_ru
     }
 
     override fun onCreateView(
@@ -75,38 +75,58 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
     }
 
     private fun initAdapter() {
-        binding.mainFragmentRecyclerView.adapter = adapter
-        adapter.setOnItemViewClickListener(this)
+        with(adapter) {
+            binding.mainFragmentRecyclerView.adapter = this
+            setOnItemViewClickListener(this@CityListFragment)
+        }
     }
 
     private fun getResourcesFromLocalServer(cityTag: CityTags) {
         viewModel = ViewModelProvider(this)
             .get(MainViewModel::class.java)
-        viewModel
-            .getLiveData()
-            .observe(
-                viewLifecycleOwner,
-                Observer<AppState> { appState: AppState -> renderData(appState) })
-        viewModel.getWeatherFromLocalSource(cityTag)
+        with(viewModel) {
+            getLiveData()
+                .observe(
+                    viewLifecycleOwner,
+                    Observer<AppState> { appState: AppState ->
+                        startResponseTime = renderData(appState)
+                            .run {
+                                System.currentTimeMillis()
+                            }.toDouble()
+                        Log.d("mylogs","startResponseTime: $startResponseTime")
+                    })
+            getWeatherFromLocalSource(cityTag)
+        }
+
     }
 
     private fun renderData(appState: AppState) {
-        when (appState) {
-            is AppState.Error -> {
-                binding.loadingLayout.visibility = View.GONE
-                val throwableMsg = appState.error.message
-                val errorText = resources.getString(ErrorText)
-                Snackbar.make(binding.root, "$errorText\n$throwableMsg", Snackbar.LENGTH_SHORT).show()
-            }
-            AppState.Loading -> {
-                binding.loadingLayout.visibility = View.VISIBLE
-            }
-            is AppState.Success -> {
-                binding.loadingLayout.visibility = View.GONE
-                val weather = appState.weatherData
-                val successMessage = resources.getString(SuccessMessage)
-                adapter.setWeather(weather)
-                Snackbar.make(binding.root, successMessage, Snackbar.LENGTH_SHORT).show()
+        with(binding) {
+            when (appState) {
+                is AppState.Error -> {
+                    loadingLayout.visibility = View.GONE
+                    val throwableMsg = appState.error.message
+                    val errorText = resources.getString(ErrorText)
+                    Snackbar.make(root, "$errorText\n$throwableMsg", Snackbar.LENGTH_SHORT)
+                        .show()
+                }
+                AppState.Loading -> {
+                    this.loadingLayout.visibility = View.VISIBLE
+                }
+                is AppState.Success -> {
+                    this.loadingLayout.visibility = View.GONE
+                    val weather = appState.weatherData
+                    val successMessage = resources.getString(SuccessMessage)
+                    val responseTimeMsg = resources.getString(ResponseTimeMsg)
+                    val responseTime: Double
+                    adapter.setWeather(weather).also {
+                        Log.d("mylogs","System.currentTimeMillis(): ${System.currentTimeMillis()}")
+                         responseTime = (System.currentTimeMillis() - startResponseTime)/1000
+                    }
+                    Snackbar.make(this.root,
+                        "$successMessage\n$responseTimeMsg $responseTime s",
+                        Snackbar.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -145,13 +165,15 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
 
     override fun onItemClick(weather: Weather) {
         val bundle = Bundle()
-        bundle.putParcelable(WeatherScreenFragment.WEATHER_KEY, weather)
-        if (navigation != null) {
-            navigation!!
-                .addFragment(
-                    containerId = R.id.main_fragment_container,
-                    fragment = WeatherScreenFragment.newInstance(bundle),
-                    addToBackStack = true)
+        with(bundle) {
+            putParcelable(WeatherScreenFragment.WEATHER_KEY, weather)
+            if (navigation != null) {
+                navigation!!
+                    .addFragment(
+                        containerId = R.id.main_fragment_container,
+                        fragment = WeatherScreenFragment.newInstance(this),
+                        addToBackStack = true)
+            }
         }
 
     }
@@ -166,9 +188,11 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
     @SuppressLint("CommitPrefEdits")
     private fun writeSP() {
         val editor = sp.edit()
-        editor.putString(CITY_TAG_KEY, cityTag.tag)
-        Log.d("mylogs", "write: ${cityTag.tag}")
-        editor.apply()
+        with(editor) {
+            putString(CITY_TAG_KEY, cityTag.tag)
+            Log.d("mylogs", "write: ${cityTag.tag}")
+            apply()
+        }
     }
 
     private fun readSPSettings() {
@@ -188,9 +212,10 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
         fun newInstance(): CityListFragment {
             val args = Bundle()
             val fragment = CityListFragment()
-
-            fragment.arguments = args
-            return fragment
+            with(fragment) {
+                arguments = args
+                return this
+            }
         }
     }
 }

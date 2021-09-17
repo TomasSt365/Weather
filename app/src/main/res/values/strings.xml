@@ -7,4 +7,5 @@
     <string name="ErrorLoadingWeather">Error!\nWeather is null</string>
     <string name="SuccessMessage">Success</string>
     <string name="ServerErrorMessage">failed to get a response from the server</string>
+    <string name="ResponseTimeMsg">Response time:</string>
 </resources>
