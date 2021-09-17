@@ -41,8 +41,10 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
     private var cityTag: CityTags = CityTags.World
 
     private fun initIcons() {
-        icons[CityTags.World] = R.drawable.ic_world
-        icons[CityTags.RU] = R.drawable.ic_ru
+        with(icons){
+            this[CityTags.World] = R.drawable.ic_world
+            this[CityTags.RU] =R.drawable.ic_ru
+        }
     }
 
     override fun onCreateView(
