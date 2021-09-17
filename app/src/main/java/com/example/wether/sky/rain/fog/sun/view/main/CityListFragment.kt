@@ -92,9 +92,9 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
         when (appState) {
             is AppState.Error -> {
                 binding.loadingLayout.visibility = View.GONE
-                val throwable = appState.error
+                val throwableMsg = appState.error.message
                 val errorText = resources.getString(ErrorText)
-                Snackbar.make(binding.root, "$errorText $throwable", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, "$errorText\n$throwableMsg", Snackbar.LENGTH_SHORT).show()
             }
             AppState.Loading -> {
                 binding.loadingLayout.visibility = View.VISIBLE
