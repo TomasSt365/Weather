@@ -62,9 +62,8 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
         initIcons()
         initViewAndVars()
         readSPSettings()
-        icons[cityTag]?.let { binding.mainFragmentFAB.setImageResource(it) }
         initAdapter()
-        getResourcesFromLocalServer(cityTag)
+        initViewModel(cityTag)
     }
 
     private fun initViewAndVars() {
@@ -81,57 +80,80 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
         }
     }
 
-    private fun getResourcesFromLocalServer(cityTag: CityTags) {
+    private fun initViewModel(cityTag: CityTags) {
         viewModel = ViewModelProvider(this)
             .get(MainViewModel::class.java)
-        with(viewModel) {
-            getLiveData()
-                .observe(
-                    viewLifecycleOwner,
-                    Observer<AppState> { appState: AppState ->
-                        startResponseTime = renderData(appState)
-                            .run {
-                                System.currentTimeMillis()
-                            }.toDouble()
-                        Log.d("mylogs","startResponseTime: $startResponseTime")
-                    })
-            getWeatherFromLocalSource(cityTag)
-        }
 
+        viewModel
+            .getLiveData()
+            .observe(
+                viewLifecycleOwner,
+                Observer<AppState> { appState: AppState -> renderData(appState) })
+
+        getWeatherFromServer(cityTag)
+    }
+
+    private fun getWeatherFromServer(cityTag: CityTags) {
+        icons[cityTag]?.let { binding.mainFragmentFAB.setImageResource(it) }
+
+        startResponseTime = viewModel.getWeatherFromLocalSource(cityTag).run {
+            System.currentTimeMillis()
+        }.toDouble().also {
+            Log.d("mylogs", "startResponseTime: $it")
+        }
     }
 
     private fun renderData(appState: AppState) {
         with(binding) {
             when (appState) {
                 is AppState.Error -> {
+                    errorScreen.visibility = View.VISIBLE
                     loadingLayout.visibility = View.GONE
                     val throwableMsg = appState.error.message
                     val errorText = resources.getString(ErrorText)
-                    Snackbar.make(root, "$errorText\n$throwableMsg", Snackbar.LENGTH_SHORT)
-                        .show()
+                    val snackbar = Snackbar
+                        .make(root, "$throwableMsg", Snackbar.LENGTH_INDEFINITE)
+                    errorMsg.apply {
+                        text = errorText
+                    }
+                    snackbar
+                        .setAction(TryAgainText) {
+                            snackbar.tryAgain()
+                        }.show()
                 }
                 AppState.Loading -> {
-                    this.loadingLayout.visibility = View.VISIBLE
+                    mainFragmentFAB.visibility = View.GONE
+                    loadingLayout.visibility = View.VISIBLE
                 }
                 is AppState.Success -> {
-                    this.loadingLayout.visibility = View.GONE
+                    mainFragmentFAB.visibility = View.VISIBLE
+                    errorScreen.visibility = View.GONE
+                    loadingLayout.visibility = View.GONE
                     val weather = appState.weatherData
                     val successMessage = resources.getString(SuccessMessage)
                     val responseTimeMsg = resources.getString(ResponseTimeMsg)
-                    val responseTime: Double
-                    adapter.setWeather(weather).also {
-                        Log.d("mylogs","System.currentTimeMillis(): ${System.currentTimeMillis()}")
-                         responseTime = (System.currentTimeMillis() - startResponseTime)/1000
-                    }
-                    Snackbar.make(this.root,
-                        "$successMessage\n$responseTimeMsg $responseTime s",
-                        Snackbar.LENGTH_SHORT).show()
+                    adapter.setWeather(weather)
+
+                    val responseTime = (System.currentTimeMillis() - startResponseTime) / 1000
+
+                    Snackbar
+                        .make(root,
+                            "$successMessage\n$responseTimeMsg ${
+                                responseTime.also {
+                                    Log.d("mylogs",
+                                        "responseTime: $it")
+                                }
+                            } s",
+                            Snackbar.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
     }
 
     override fun onClick(view: View?) {
+        //todo: сделать так чтобы при длином нажатии на FAB выскакивало окно с выбором локации,
+        // по возможности сделать открытие этого окна с анимацией
         if (view != null) {
             when (view) {
                 binding.mainFragmentFAB -> {
@@ -155,8 +177,7 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
                         CityTags.World -> CityTags.RU
                         else -> CityTags.World
                     }
-                    icons[cityTag]?.let { binding.mainFragmentFAB.setImageResource(it) }
-                    viewModel.getWeatherFromLocalSource(cityTag)
+                    getWeatherFromServer(cityTag)
                     writeSP()
                 }
             }
@@ -198,11 +219,17 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
     private fun readSPSettings() {
         sp.getString(CITY_TAG_KEY, CityTags.World.tag).also {
             if (it != null) {
-                cityTag = CityTags.getEnumByTag(it)
-                Log.d("mylogs", "it: $it")
-                Log.d("mylogs", "read: $cityTag")
+                cityTag = CityTags.getEnumByTag(it).also { tag ->
+                    Log.d("mylogs", "read: $tag")
+                }
             }
         }
+    }
+
+    private fun Snackbar.tryAgain() {
+        binding.errorScreen.visibility = View.GONE
+        getWeatherFromServer(cityTag)
+        this.dismiss()
     }
 
     companion object {

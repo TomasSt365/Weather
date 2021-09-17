@@ -25,12 +25,14 @@ class MainViewModel(
             sleep(1000)
             val isError = nextBoolean()//todo: строка для теста
             with(liveDataToObserve) {
-                if (isError) {
-                    Log.d("mylogs", "произошла ошибка загрузки данных с сервера")
-                    this.postValue(AppState.Error(controller.errorGettingWeather()))
-                } else {
-                    Log.d("mylogs", "успешная загрузка данных с сервера")
-                    this.postValue(AppState.Success(controller.getWeatherFromLocalStorage(cityTag)))
+                controller.also {
+                    if (isError) {
+                        Log.d("mylogs", "произошла ошибка загрузки данных с сервера")
+                        postValue(AppState.Error(it.errorGettingWeather()))
+                    } else {
+                        Log.d("mylogs", "успешная загрузка данных с сервера")
+                        postValue(AppState.Success(it.getWeatherFromLocalStorage(cityTag)))
+                    }
                 }
             }
         }.start()
