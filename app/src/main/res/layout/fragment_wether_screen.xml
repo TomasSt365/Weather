@@ -92,6 +92,29 @@
             app:layout_constraintStart_toEndOf="@+id/feelsLikeLabel"
             app:layout_constraintTop_toTopOf="@+id/feelsLikeLabel"
             tools:text="-23" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+        android:id="@+id/errorScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/errorMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="35sp"
+            android:layout_gravity="center"
+            android:textColor="@color/design_default_color_error"
+            tools:text="ErrorText" />
+
+    </FrameLayout>
 
 </FrameLayout>

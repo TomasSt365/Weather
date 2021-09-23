@@ -17,22 +17,21 @@ class WeatherLoader(
     fun loadWeather() {
 
         val url = getRequestURL(lat, lon)
+        val key = "X-Yandex-API-Key"
+        val value = "4949ae6a-001d-421c-995f-4aca8186b4f0"
 
         Thread {
             val urlConnection = url.openConnection() as HttpsURLConnection
             urlConnection.requestMethod = "GET"
-            urlConnection.addRequestProperty(
-                "X-Yandex-API-Key",
-                "4949ae6a-001d-421c-995f-4aca8186b4f0"
-            )
+            urlConnection.addRequestProperty(key, value)
             urlConnection.readTimeout = 10000
             val reader = BufferedReader(InputStreamReader(urlConnection.inputStream))
             val weatherDTO = Gson().fromJson(reader, WeatherDTO::class.java)
             val handler = Handler(Looper.getMainLooper())
-            if(weatherDTO != null){
+            if (weatherDTO != null) {
                 handler.post { listener.onLoaded(weatherDTO) }
-            }else{
-                val error = Throwable("failed to get a response from the server")
+            } else {
+                val error = Throwable("ERROR!")
                 //не смог достучаться до ресурсов
                 handler.post { listener.onFailed(error) }
             }

@@ -1,21 +1,19 @@
 package com.example.wether.sky.rain.fog.sun.view.main
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.wether.sky.rain.fog.sun.R.string.ErrorLoadingWeather
+import com.example.wether.sky.rain.fog.sun.controller.WeatherDTO
+import com.example.wether.sky.rain.fog.sun.controller.WeatherLoaderListener
 import com.example.wether.sky.rain.fog.sun.data.Weather
 import com.example.wether.sky.rain.fog.sun.databinding.FragmentWetherScreenBinding
 import com.example.wether.sky.rain.fog.sun.view.Navigation
 import com.google.android.material.snackbar.Snackbar
-import com.example.wether.sky.rain.fog.sun.R
-import com.example.wether.sky.rain.fog.sun.R.string.*
 
-class WeatherScreenFragment : Fragment() {
+class WeatherScreenFragment : Fragment(), WeatherLoaderListener {
     private var navigation: Navigation? = null
 
     private var _binding: FragmentWetherScreenBinding? = null
@@ -38,9 +36,6 @@ class WeatherScreenFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         if (arguments != null) {
             currentWeather = (requireArguments().get(WEATHER_KEY) as Weather?)!!
-        } else {
-            val errorMessage = resources.getString(ErrorLoadingWeather)
-            Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_SHORT).show()
         }
         currentWeather?.let { setData(it) }
     }
@@ -79,5 +74,20 @@ class WeatherScreenFragment : Fragment() {
                 return this
             }
         }
+    }
+
+    override fun onLoaded(weatherDTO: WeatherDTO) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onFailed(error: Throwable) {
+        val errorMessage = resources.getString(ErrorLoadingWeather)
+        with(binding){
+            errorScreen.visibility = View.VISIBLE
+            errorMsg.apply { 
+                text = error.message
+            }
+        }
+        Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_INDEFINITE).show()
     }
 }
