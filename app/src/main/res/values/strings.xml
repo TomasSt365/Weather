@@ -4,9 +4,10 @@
     <string name="feels_like_label">Ощущается как</string>
     <string name="city_coordinates">lt/ln: %s, %s"</string>
     <string name="ErrorText">ERROR!</string>
-    <string name="ErrorLoadingWeather">Error!\nWeather not found</string>
+    <string name="ErrorLoadingWeather">Failed to get resources</string>
     <string name="SuccessMessage">Success</string>
-    <string name="ServerErrorMessage">failed to get resources</string>
+    <string name="ServerErrorMessage">Weather not found</string>
     <string name="ResponseTimeMsg">Response time:</string>
     <string name="TryAgainText">try again</string>
+    <string name="BackActionText">Back</string>
 </resources>

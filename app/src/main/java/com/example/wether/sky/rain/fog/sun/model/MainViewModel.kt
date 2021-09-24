@@ -25,8 +25,12 @@ class MainViewModel(
             sleep(1000)
             with(liveDataToObserve) {
                 controller.also {
-                        Log.d("mylogs", "успешная загрузка данных с сервера")
-                        postValue(AppState.Success(it.getWeatherFromLocalStorage(cityTag)))
+                    val weatherList = it.getWeatherFromLocalStorage(cityTag)
+                    if (weatherList != null) {
+                        postValue(AppState.Success(weatherList))
+                    } else {
+                        postValue(AppState.Error(it.errorGettingWeather()))
+                    }
                 }
             }
         }.start()

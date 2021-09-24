@@ -10,7 +10,7 @@ data class Weather(
     var feelsLike: Int,
 ) : Parcelable
 
-fun getCites(cityTag: CityTags): List<Weather> {
+fun getCites(cityTag: CityTags): List<Weather>? {
 
     /**Нереализованные локали не должны быть в списке !!!*/
 
@@ -24,7 +24,7 @@ fun getCites(cityTag: CityTags): List<Weather> {
         CityTags.World -> {
             getWorldCities()
         }
-        else -> getWorldCities()
+        else -> null
     }
 }
 

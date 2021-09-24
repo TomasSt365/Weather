@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.wether.sky.rain.fog.sun.R.string.ErrorLoadingWeather
 import com.example.wether.sky.rain.fog.sun.controller.WeatherDTO
 import com.example.wether.sky.rain.fog.sun.controller.WeatherLoaderListener
 import com.example.wether.sky.rain.fog.sun.data.Weather
 import com.example.wether.sky.rain.fog.sun.databinding.FragmentWetherScreenBinding
 import com.example.wether.sky.rain.fog.sun.view.Navigation
 import com.google.android.material.snackbar.Snackbar
+import com.example.wether.sky.rain.fog.sun.R.string.*
 
 class WeatherScreenFragment : Fragment(), WeatherLoaderListener {
     private var navigation: Navigation? = null
@@ -80,14 +80,21 @@ class WeatherScreenFragment : Fragment(), WeatherLoaderListener {
         TODO("Not yet implemented")
     }
 
-    override fun onFailed(error: Throwable) {
-        val errorMessage = resources.getString(ErrorLoadingWeather)
+    override fun onFailed(errors: List<String>?) {
         with(binding){
             errorScreen.visibility = View.VISIBLE
             errorMsg.apply { 
-                text = error.message
+                var errorList = ""
+                errors?.forEach{
+                    errorList += "$it\n"
+                }
+                text = errorList
             }
         }
-        Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_INDEFINITE).show()
+        Snackbar.make(binding.root, ErrorText, Snackbar.LENGTH_INDEFINITE)
+            .setAction(BackActionText){
+                requireActivity().onBackPressed()
+            }
+            .show()
     }
 }
