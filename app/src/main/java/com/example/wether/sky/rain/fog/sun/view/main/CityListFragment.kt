@@ -9,12 +9,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.wether.sky.rain.fog.sun.R
+import com.example.wether.sky.rain.fog.sun.R.drawable.*
 import com.example.wether.sky.rain.fog.sun.R.string.*
+import com.example.wether.sky.rain.fog.sun.data.City
 import com.example.wether.sky.rain.fog.sun.data.CityTags
-import com.example.wether.sky.rain.fog.sun.data.Weather
+import com.example.wether.sky.rain.fog.sun.data.CityTags.*
 import com.example.wether.sky.rain.fog.sun.databinding.FragmentCityListBinding
 import com.example.wether.sky.rain.fog.sun.model.AppState
 import com.example.wether.sky.rain.fog.sun.model.MainViewModel
@@ -39,12 +40,12 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
     private lateinit var sp: SharedPreferences
 
     private var adapter = CityListAdapter()
-    private var cityTag: CityTags = CityTags.World
+    private var cityTag: CityTags = World
     private var startResponseTime: Double = 0.0
 
     private fun initIcons() {
-        icons[CityTags.World] = R.drawable.ic_world
-        icons[CityTags.RU] = R.drawable.ic_ru
+        icons[World] = ic_world
+        icons[RU] = ic_ru
     }
 
     override fun onCreateView(
@@ -87,8 +88,7 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
         viewModel
             .getLiveData()
             .observe(
-                viewLifecycleOwner,
-                Observer<AppState> { appState: AppState -> renderData(appState) })
+                viewLifecycleOwner, { appState: AppState -> renderData(appState) })
 
         getWeatherFromServer(cityTag)
     }
@@ -129,10 +129,10 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
                     mainFragmentFAB.visibility = View.VISIBLE
                     errorScreen.visibility = View.GONE
                     loadingLayout.visibility = View.GONE
-                    val weather = appState.weatherData
+                    val cites = appState.citesData
                     val successMessage = resources.getString(SuccessMessage)
                     val responseTimeMsg = resources.getString(ResponseTimeMsg)
-                    adapter.setWeather(weather)
+                    adapter.setWeather(cites)
 
                     val responseTime = (System.currentTimeMillis() - startResponseTime) / 1000
 
@@ -172,10 +172,10 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
                     /**Нереализованные локали не должны быть в списке !!!*/
 
                     cityTag = when (cityTag) {
-                        CityTags.RU -> CityTags.World
-                        /*CityTags.EU -> CityTags.World*/
-                        CityTags.World -> CityTags.RU
-                        else -> CityTags.World
+                        RU -> World
+                        /*EU -> World*/
+                        World -> RU
+                        else -> World
                     }
                     getWeatherFromServer(cityTag)
                     writeSP()
@@ -184,15 +184,15 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
         }
     }
 
-    override fun onItemClick(weather: Weather) {
+    override fun onItemClick(city: City) {
         val bundle = Bundle()
         with(bundle) {
-            putParcelable(WeatherScreenFragment.WEATHER_KEY, weather)
+            putParcelable(DetailsCityScreenFragment.CITY_KEY, city)
             if (navigation != null) {
                 navigation!!
                     .addFragment(
                         containerId = R.id.main_fragment_container,
-                        fragment = WeatherScreenFragment.newInstance(this),
+                        fragment = DetailsCityScreenFragment.newInstance(this),
                         addToBackStack = true)
             }
         }
@@ -217,7 +217,7 @@ class CityListFragment : Fragment(), View.OnClickListener, OnItemViewClickListen
     }
 
     private fun readSPSettings() {
-        sp.getString(CITY_TAG_KEY, CityTags.World.tag).also {
+        sp.getString(CITY_TAG_KEY, World.tag).also {
             if (it != null) {
                 cityTag = CityTags.getEnumByTag(it).also { tag ->
                     Log.d("mylogs", "read: $tag")

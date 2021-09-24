@@ -8,11 +8,11 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.wether.sky.rain.fog.sun.R
-import com.example.wether.sky.rain.fog.sun.data.Weather
+import com.example.wether.sky.rain.fog.sun.data.City
 
 class CityListAdapter : RecyclerView.Adapter<CityListAdapter.MainFragmentViewHolder>() {
 
-    private var weatherData: List<Weather> = listOf()
+    private var cityData: List<City> = listOf()
     private lateinit var listener: OnItemViewClickListener
 
     /*private var _biding: ItemListElementBinding? = null
@@ -20,8 +20,8 @@ class CityListAdapter : RecyclerView.Adapter<CityListAdapter.MainFragmentViewHol
         get() = _biding!!*/
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setWeather(data: List<Weather>) {
-        weatherData = data
+    fun setWeather(data: List<City>) {
+        cityData = data
         notifyDataSetChanged()
     }
 
@@ -39,12 +39,12 @@ class CityListAdapter : RecyclerView.Adapter<CityListAdapter.MainFragmentViewHol
     override fun onBindViewHolder(holder: MainFragmentViewHolder, position: Int) {
         with(holder){
             cityName.apply {
-                text = weatherData[position].city?.name ?: ""
+                text = cityData[position].name
             }
         }
     }
 
-    override fun getItemCount() = weatherData.size
+    override fun getItemCount() = cityData.size
 
     inner class MainFragmentViewHolder(view: View) : RecyclerView.ViewHolder(view),
         OnItemViewClickListener,
@@ -52,15 +52,15 @@ class CityListAdapter : RecyclerView.Adapter<CityListAdapter.MainFragmentViewHol
         private val cardView: CardView = view.findViewById(R.id.itemContainer)
         val cityName: TextView = view.findViewById(R.id.cityName)
 
-        override fun onItemClick(weather: Weather) {
-            listener.onItemClick(weather)
+        override fun onItemClick(city: City) {
+            listener.onItemClick(city)
         }
 
         override fun onClick(view: View?) {
             if (view != null) {
                 when (view.id) {
                     R.id.itemContainer -> {
-                        onItemClick(weather = weatherData[layoutPosition])//getPosition is Deprecated
+                        onItemClick(city = cityData[layoutPosition])//getPosition is Deprecated
                     }
                 }
             }

@@ -1,12 +1,10 @@
 package com.example.wether.sky.rain.fog.sun.model
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.wether.sky.rain.fog.sun.controller.ControllerImpl
 import com.example.wether.sky.rain.fog.sun.data.CityTags
 import java.lang.Thread.sleep
-import kotlin.random.Random.Default.nextBoolean
 
 class MainViewModel(
     private val liveDataToObserve: MutableLiveData<AppState> = MutableLiveData(),
@@ -25,11 +23,11 @@ class MainViewModel(
             sleep(1000)
             with(liveDataToObserve) {
                 controller.also {
-                    val weatherList = it.getWeatherFromLocalStorage(cityTag)
-                    if (weatherList != null) {
-                        postValue(AppState.Success(weatherList))
+                    val cityList = it.getCitesListFromLocalStorage(cityTag)
+                    if (cityList != null) {
+                        postValue(AppState.Success(cityList))
                     } else {
-                        postValue(AppState.Error(it.errorGettingWeather()))
+                        postValue(AppState.Error(it.errorGettingCitesList()))
                     }
                 }
             }

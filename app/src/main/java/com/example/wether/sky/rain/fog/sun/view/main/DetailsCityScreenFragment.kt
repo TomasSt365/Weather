@@ -5,28 +5,33 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.wether.sky.rain.fog.sun.controller.WeatherDTO
+import com.example.wether.sky.rain.fog.sun.R.string.*
+import com.example.wether.sky.rain.fog.sun.data.WeatherDTO
+import com.example.wether.sky.rain.fog.sun.controller.WeatherLoader
 import com.example.wether.sky.rain.fog.sun.controller.WeatherLoaderListener
-import com.example.wether.sky.rain.fog.sun.data.Weather
-import com.example.wether.sky.rain.fog.sun.databinding.FragmentWetherScreenBinding
+import com.example.wether.sky.rain.fog.sun.databinding.FragmentCityDetailsBinding
 import com.example.wether.sky.rain.fog.sun.view.Navigation
 import com.google.android.material.snackbar.Snackbar
-import com.example.wether.sky.rain.fog.sun.R.string.*
+import com.example.wether.sky.rain.fog.sun.data.City
+import com.example.wether.sky.rain.fog.sun.data.*
 
-class WeatherScreenFragment : Fragment(), WeatherLoaderListener {
+class DetailsCityScreenFragment : Fragment(), WeatherLoaderListener {
     private var navigation: Navigation? = null
 
-    private var _binding: FragmentWetherScreenBinding? = null
-    private val binding: FragmentWetherScreenBinding
+    private var _binding: FragmentCityDetailsBinding? = null
+    private val binding: FragmentCityDetailsBinding
         get() = _binding!!
-    private var currentWeather: Weather? = null
+
+    private val currentCity: City by lazy {
+        (arguments?.getParcelable(CITY_KEY)) ?: getDefaultCity()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentWetherScreenBinding.inflate(inflater, container, false)
+        _binding = FragmentCityDetailsBinding.inflate(inflater, container, false)
         navigation = Navigation(requireActivity().supportFragmentManager)
 
         return binding.root
@@ -34,22 +39,22 @@ class WeatherScreenFragment : Fragment(), WeatherLoaderListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (arguments != null) {
-            currentWeather = (requireArguments().get(WEATHER_KEY) as Weather?)!!
-        }
-        currentWeather?.let { setData(it) }
+        WeatherLoader(this, currentCity.lat, currentCity.lon).loadWeather()
     }
 
-    private fun setData(weather: Weather) {
+    private fun showWeather(weatherDTO: WeatherDTO) {
         with(binding) {
             cityName.apply {
-                text = weather.city.name
+                text = currentCity.name
             }
             temperatureValue.apply {
-                text = weather.temperature.toString()
+                text = "${weatherDTO.fact.temp}"
             }
             feelsLikeValue.apply {
-                text = weather.feelsLike.toString()
+                text = "${weatherDTO.fact.feels_like}"
+            }
+            weatherCondition.apply {
+                text = "${weatherDTO.fact.condition}"
             }
         }
     }
@@ -64,10 +69,32 @@ class WeatherScreenFragment : Fragment(), WeatherLoaderListener {
         navigation = null
     }
 
+    override fun onLoaded(weatherDTO: WeatherDTO) {
+        showWeather(weatherDTO)
+    }
+
+    override fun onFailed(errors: List<String>) {
+        with(binding) {
+            errorScreen.visibility = View.VISIBLE
+            errorMsg.apply {
+                var errorList = ""
+                errors.forEach {
+                    errorList += "$it\n"
+                }
+                text = errorList
+            }
+        }
+        Snackbar.make(binding.root, ErrorText, Snackbar.LENGTH_INDEFINITE)
+            .setAction(BackActionText) {
+                requireActivity().onBackPressed()
+            }
+            .show()
+    }
+
     companion object {
-        const val WEATHER_KEY = "WEATHER_KEY"
-        fun newInstance(bundle: Bundle): WeatherScreenFragment {
-            val fragment = WeatherScreenFragment()
+        const val CITY_KEY = "CITY_KEY"
+        fun newInstance(bundle: Bundle): DetailsCityScreenFragment {
+            val fragment = DetailsCityScreenFragment()
 
             with(fragment) {
                 arguments = bundle
@@ -76,25 +103,4 @@ class WeatherScreenFragment : Fragment(), WeatherLoaderListener {
         }
     }
 
-    override fun onLoaded(weatherDTO: WeatherDTO) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onFailed(errors: List<String>?) {
-        with(binding){
-            errorScreen.visibility = View.VISIBLE
-            errorMsg.apply { 
-                var errorList = ""
-                errors?.forEach{
-                    errorList += "$it\n"
-                }
-                text = errorList
-            }
-        }
-        Snackbar.make(binding.root, ErrorText, Snackbar.LENGTH_INDEFINITE)
-            .setAction(BackActionText){
-                requireActivity().onBackPressed()
-            }
-            .show()
-    }
 }

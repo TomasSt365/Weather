@@ -1,4 +1,4 @@
-package com.example.wether.sky.rain.fog.sun.controller
+package com.example.wether.sky.rain.fog.sun.data
 
 data class FactDTO(
     val obs_time: Int?,
@@ -15,7 +15,7 @@ data class FactDTO(
     val polar: Boolean?,
     val season: String?,
     val wind_gust: Double?,
-    val errors: List<String>?
+    //val errors: List<String>?
     //todo: свойство из конвертированого Json с ошибками. Проверить на коректную работу!
 )
 

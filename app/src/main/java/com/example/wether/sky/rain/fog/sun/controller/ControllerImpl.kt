@@ -6,8 +6,8 @@ import com.example.wether.sky.rain.fog.sun.data.getCites
 
 class ControllerImpl : Controller {
 
-    override fun getWeatherFromLocalStorage(cityTag: CityTags) = getCites(cityTag)
+    override fun getCitesListFromLocalStorage(cityTag: CityTags) = getCites(cityTag)
 
-    override fun errorGettingWeather() = Throwable("$ErrorLoadingWeather")
+    override fun errorGettingCitesList() = Throwable("$ErrorLoadingWeather")
 
 }

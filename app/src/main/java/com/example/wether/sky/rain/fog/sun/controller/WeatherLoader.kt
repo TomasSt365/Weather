@@ -2,7 +2,8 @@ package com.example.wether.sky.rain.fog.sun.controller
 
 import android.os.Handler
 import android.os.Looper
-import com.example.wether.sky.rain.fog.sun.R.string.ServerErrorMessage
+import com.example.wether.sky.rain.fog.sun.data.WeatherDTO
+import com.example.wether.sky.rain.fog.sun.data.FactDTO
 import com.google.gson.Gson
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -30,18 +31,10 @@ class WeatherLoader(
             }
             urlConnection.readTimeout = 10000
             val reader = BufferedReader(InputStreamReader(urlConnection.inputStream))
-            val weatherDTO = Gson().fromJson(reader, WeatherDTO::class.java)
+            val factDTO = Gson().fromJson(reader, FactDTO::class.java)
+            val weatherDTO = WeatherDTO(factDTO)
             val handler = Handler(Looper.getMainLooper())
-            if (weatherDTO != null) {
-                if (weatherDTO.fact.errors != null) {
-                    val errors = weatherDTO.fact.errors
-                    handler.post { listener.onFailed(errors) }
-                }
-                handler.post { listener.onLoaded(weatherDTO) }
-            } else {
-                val errors = listOf("$ServerErrorMessage")
-                handler.post { listener.onFailed(errors) }
-            }
+            handler.post { listener.onLoaded(weatherDTO) }
             urlConnection.disconnect()
         }.start()
 
