@@ -6,7 +6,7 @@ data class FactDTO(
     val feels_like: Int?,
     val icon: String?,
     val condition: String?,
-    val wind_speed: Int?,
+    val wind_speed: Double?,
     val wind_dir: String?,
     val pressure_mm: Int?,
     val pressure_pa: Int?,
@@ -15,7 +15,7 @@ data class FactDTO(
     val polar: Boolean?,
     val season: String?,
     val wind_gust: Double?,
-    //val errors: List<String>?
+    val errors: List<String>?
     //todo: свойство из конвертированого Json с ошибками. Проверить на коректную работу!
 )
 
