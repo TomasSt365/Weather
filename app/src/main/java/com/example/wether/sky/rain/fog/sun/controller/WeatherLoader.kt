@@ -1,13 +1,15 @@
 package com.example.wether.sky.rain.fog.sun.controller
 
+import Const.APIkeys
+import Const.yandexWeatherKey
 import android.os.Handler
 import android.os.Looper
+import com.example.wether.sky.rain.fog.sun.R
 import com.example.wether.sky.rain.fog.sun.data.WeatherDTO
-import com.example.wether.sky.rain.fog.sun.data.FactDTO
 import com.google.gson.Gson
+import getWeatherULR
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 class WeatherLoader(
@@ -18,10 +20,7 @@ class WeatherLoader(
 
     fun loadWeather() {
 
-        val url = getRequestURL(lat, lon)
-        val APIkeys = HashMap<String, String>()
-        val yandexWeatherKey = "X-Yandex-API-Key"
-        APIkeys[yandexWeatherKey] = "4949ae6a-001d-421c-995f-4aca8186b4f0"
+        val url = getWeatherULR(lat, lon)
 
         Thread {
             val urlConnection = url.openConnection() as HttpsURLConnection
@@ -31,21 +30,20 @@ class WeatherLoader(
             }
             urlConnection.readTimeout = 10000
             val reader = BufferedReader(InputStreamReader(urlConnection.inputStream))
-            val factDTO = Gson().fromJson(reader, FactDTO::class.java)
-            val weatherDTO = WeatherDTO(factDTO)
+            val weatherDTO  = Gson().fromJson(reader, WeatherDTO::class.java)
             val handler = Handler(Looper.getMainLooper())
-            handler.post { listener.onLoaded(weatherDTO) }
+            if (weatherDTO != null) {
+                if (weatherDTO.fact.errors != null) {
+                    val errors = weatherDTO.fact.errors
+                    handler.post { listener.onFailed(errors) }
+                }
+                handler.post { listener.onLoaded(weatherDTO) }
+            } else {
+                val errors = listOf("${R.string.ServerErrorMessage}")
+                handler.post { listener.onFailed(errors) }
+            }
             urlConnection.disconnect()
         }.start()
 
-    }
-
-    private fun getRequestURL(lat: Double, lon: Double): URL {
-        val protocol = "https"
-        val host = "api.weather.yandex.ru"
-        val path = "v2/informers"
-        val request = "?lat=${lat}&lon=${lon}"
-
-        return URL("${protocol}://${host}/${path}${request}")
     }
 }
